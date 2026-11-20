@@ -24,6 +24,34 @@ def clean_team(name, aliases=None):
     return t
 
 
+def name_key(t):
+    """Identity key for automatic name merging. Two names merge only when they differ in nothing
+    but case, spacing, punctuation, or how the birth years are written (2013/14, 2013/2014,
+    2013-2014, 13/14). Words are never dropped, so 'X Academy' and 'X' stay separate teams."""
+    s = (t or "").lower()
+    s = re.sub(r"(?<!\d)(?:20)?(\d\d)\s*[-/]\s*(?:20)?(\d\d)(?!\d)", r"\1\2", s)
+    return re.sub(r"[^a-z0-9]", "", s)
+
+
+def canonical_names(games):
+    """Map every raw name to one spelling per name_key (the most used one). Returns the map and
+    the merges made, so every merge is published with the week's tables."""
+    use = collections.Counter()
+    for g in games:
+        use[g["home"]] += 1; use[g["away"]] += 1
+    groups = collections.defaultdict(list)
+    for n in use:
+        groups[name_key(n)].append(n)
+    canon, merges = {}, []
+    for names in groups.values():
+        best = max(names, key=lambda n: (use[n], n))
+        for n in names:
+            canon[n] = best
+            if n != best:
+                merges.append(dict(name=n, merged_into=best, games=use[n]))
+    return canon, sorted(merges, key=lambda m: m["merged_into"])
+
+
 def load_aliases(path=os.path.join(ROOT, "teams", "aliases.csv")):
     out = {}
     if os.path.exists(path):
@@ -147,12 +175,15 @@ def main():
     ledger = a.ledger or os.path.join(ROOT, "runs", a.week, "ledger.csv")
     out = a.out or os.path.join(ROOT, "runs", a.week)
     games = [g for g in read_ledger(ledger, load_aliases()) if p["season_start"] <= g["date"] < a.week]
+    canon, merges = canonical_names(games)
+    for g in games:
+        g["home"], g["away"] = canon[g["home"]], canon[g["away"]]
     tables = collections.defaultdict(list)
     for g in games:
         tables[g["table"]].append(g)
     res = {k: rate_table(v, p) for k, v in sorted(tables.items())}
     os.makedirs(out, exist_ok=True)
-    json.dump(dict(week=a.week, methodology=p["version"], tables=res), open(os.path.join(out, "tables.json"), "w"), indent=1)
+    json.dump(dict(week=a.week, methodology=p["version"], name_merges=merges, tables=res), open(os.path.join(out, "tables.json"), "w"), indent=1)
     for k, v in res.items():
         print(f'{k:28s} games={v["games"]:5d} ranked={len(v["table"]):4d} {"national" if v["national"] else "by group (%d)" % v["groups"]}')
 

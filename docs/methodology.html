@@ -103,7 +103,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
   <tr><td>Home field</td><td>A small home edge is estimated from the data for league games. Showcases and qualifiers are neutral.</td><td>See section 5.</td></tr>
   <tr><td>Event type</td><td>Showcase and qualifier games weigh the same as league games (weight 1.0).</td><td>They matter most for connecting conferences, not because they count double.</td></tr>
   <tr><td>Recency</td><td>No decay in v1. Every game this season counts equally.</td><td>Season sample sizes are still small. A recency option will be tested and announced before use.</td></tr>
-  <tr><td>Number of games</td><td>Teams need at least <strong>6</strong> scored games to appear (moving to 8 in January).</td><td>Too few games and the rating is mostly noise.</td></tr>
+  <tr><td>Number of games</td><td>No minimum. Every team with a scored game is ranked.</td><td>Rankings settle as the season unfolds, as in any sport. A team with few games gets a wider rank range, and shrinkage keeps it from jumping too far on a handful of results.</td></tr>
   <tr><td>Shrinkage</td><td>Every rating is gently pulled toward 0 (average).</td><td>Stops a team with a few lopsided results from jumping to the top.</td></tr>
 </table>
 
@@ -121,7 +121,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
 <p>Some events (for example the EA Winter Qualifier) have not been played yet for older age groups. Rankings still publish for those ages; they will shift once those games are in. That movement is expected and is shown in the weekly change column.</p>
 
 <h2 id="who">7. Who gets ranked, and when a table is "national"</h2>
-<p>A team is ranked when it has the minimum number of scored games. A table is published as one <strong>national</strong> list when at least 80% of its teams are linked together through games, directly or through common opponents. When a table is less connected than that (often early in the season, or in leagues that play only inside regions), we publish it <strong>by conference or region</strong> instead of pretending we can compare teams that have no games in common.</p>
+<p>Every team with at least one scored game is ranked; there is no minimum. Early in the season, and for teams that have played only a few games, the rank range is wider and the spot will move more as results come in. A table is published as one <strong>national</strong> list when at least 80% of its teams are linked together through games, directly or through common opponents. When a table is less connected than that (often early in the season, or in leagues that play only inside regions), we publish it <strong>by conference or region</strong> instead of pretending we can compare teams that have no games in common.</p>
 
 <h2 id="range">8. The rank range (what "stability range" means)</h2>
 <p>Next to each rank we show a small range, like <code>#4 (3–6)</code>. It answers one question: <strong>how sure are we about this spot?</strong></p>
@@ -185,7 +185,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
   <tr><td>Ridge λ (shrinkage)</td><td class="num">1.0</td><td>0.5 and 2.0</td></tr>
   <tr><td>Showcase / qualifier weight</td><td class="num">1.0</td><td>0.75 and 1.5</td></tr>
   <tr><td>Home edge</td><td class="num">estimated</td><td>—</td></tr>
-  <tr><td>Minimum games to rank</td><td class="num">6</td><td>8 from January</td></tr>
+  <tr><td>Minimum games to rank</td><td class="num">none</td><td>—</td></tr>
   <tr><td>National threshold</td><td class="num">80%</td><td>share of teams in the largest connected group</td></tr>
   <tr><td>Recency decay</td><td class="num">none</td><td>—</td></tr>
 </table>
@@ -225,9 +225,8 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
 
 <details><summary>Team name cleanup rules <span class="tag">identity</span></summary>
 <ol>
-  <li>Trim and collapse whitespace.</li>
-  <li>Normalize separators (" - " becomes a space).</li>
-  <li>Case-insensitive matching: names that differ only by capitalization are the same team.</li>
+  <li>Trim and collapse whitespace; normalize separators (" - " becomes a space).</li>
+  <li>Automatic merge: names that differ only in capitalization, spacing, punctuation, or how birth years are written (2013/14, 2013/2014, 2013-2014, 13/14) are the same team. The most-used spelling is kept. Words are never dropped, so "X Academy" and "X" stay separate teams. Every automatic merge is listed in that week's <code>tables.json</code> under <code>name_merges</code>.</li>
   <li>Manual alias table for real renames and sponsor-name changes, published as <code>teams/aliases.csv</code> with the date and reason for each merge.</li>
   <li>Different age-group squads of the same club are never merged.</li>
 </ol>
@@ -245,7 +244,7 @@ python model/rate.py --week 2026-12-08</pre>
 <details><summary>Changelog <span class="tag">versions</span></summary>
 <table>
   <tr><th>Version</th><th>Date</th><th>Change</th></tr>
-  <tr><td>1.0</td><td>Dec 3, 2026</td><td>Launch: ridge-regularized margin model, cap 4, λ 1.0, min 6 games, 80% national threshold.</td></tr>
+  <tr><td>1.0</td><td>Dec 3, 2026</td><td>Launch: ridge-regularized margin model, cap 4, λ 1.0, no minimum games, 80% national threshold.</td></tr>
 </table>
 </details>
 
