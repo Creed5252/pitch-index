@@ -91,11 +91,20 @@ def rate_table(games, p):
     share = len(comps[0]) / sum(len(c) for c in comps)
     national = share >= p["national_threshold"]
     comp_of = {t: i for i, c in enumerate(comps) for t in c}
-    st = {t: dict(gp=0, w=0, d=0, l=0, gf=0, ga=0, opp=[]) for t in ratings}
+    st = {t: dict(gp=0, w=0, d=0, l=0, gf=0, ga=0, opp=[], conf=collections.Counter()) for t in ratings}
     for g in games:
-        for t, o, f, a in ((g["home"], g["away"], g["hs"], g["as_"]), (g["away"], g["home"], g["as_"], g["hs"])):
+        for t, o, f, a, c in ((g["home"], g["away"], g["hs"], g["as_"], g.get("conf_home")),
+                              (g["away"], g["home"], g["as_"], g["hs"], g.get("conf_away"))):
             s = st[t]; s["gp"] += 1; s["gf"] += f; s["ga"] += a; s["opp"].append(ratings[o])
             s["w" if f > a else "d" if f == a else "l"] += 1
+            if c:
+                s["conf"][c] += 1
+    team_conf = {t: (st[t]["conf"].most_common(1)[0][0] if st[t]["conf"] else None) for t in st}
+    labels = []
+    for c in comps:
+        cnt = collections.Counter(team_conf[t] for t in c if team_conf[t])
+        top = [k for k, _ in cnt.most_common(3)]
+        labels.append(" / ".join(top) if top else "Unaffiliated")
     eligible = [t for t in ratings if st[t]["gp"] >= p["min_games"] and (not national or comp_of[t] == 0)]
     base = rank_order(ratings, eligible, comp_of, national)
     lo, hi = dict(base), dict(base)
@@ -107,11 +116,13 @@ def rate_table(games, p):
     rows = []
     for t in eligible:
         s = st[t]
-        rows.append(dict(team=t, group=comp_of[t], rank=base[t], range=[lo[t], hi[t]],
+        rows.append(dict(team=t, conf=team_conf[t], group=comp_of[t], rank=base[t], range=[lo[t], hi[t]],
                          rating=round(float(ratings[t]), 3), sos=round(float(np.mean(s["opp"])), 3),
                          gp=s["gp"], w=s["w"], d=s["d"], l=s["l"], gf=s["gf"], ga=s["ga"]))
     rows.sort(key=lambda r: (r["group"] if not national else 0, r["rank"]))
+    used = sorted({r["group"] for r in rows})
     return dict(national=national, main_share=round(share, 3), groups=len(comps),
+                group_labels={str(i): labels[i] for i in used},
                 home_edge=round(hfa, 3), games=len(games), table=rows)
 
 
@@ -123,7 +134,7 @@ def read_ledger(path, aliases):
         out.append(dict(table=f'{r["league"]} {r["gender"]} {r["age"]}',
                         home=clean_team(r["home"], aliases), away=clean_team(r["away"], aliases),
                         hs=int(r["hs"]), as_=int(r["as"]), neutral=r["neutral"] in ("1", "true", "True"),
-                        date=r["date"]))
+                        date=r["date"], conf_home=r.get("conf_home") or None, conf_away=r.get("conf_away") or None))
     return out
 
 
