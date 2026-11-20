@@ -31,3 +31,16 @@ def test_disconnected_table_ranks_by_group():
 
 def test_clean_team():
     assert rate.clean_team("  Bay Area Surf - ECNL G10 ") == "Bay Area Surf ECNL G10"
+
+def test_name_key_merges_formats_not_words():
+    k = rate.name_key
+    assert k("Baltimore Celtic ECNL RL B2013/14") == k("Baltimore Celtic ECNL RL B2013/2014")
+    assert k("Match Fit Surf ECNL RL G2012/13") == k("Matchfit Surf ECNL RL G2012/13")
+    assert k("LA Breakers ECNL G2009-2010") == k("LA Breakers ECNL G2009/10")
+    assert k("SUSA FC ACADEMY ECNL RL B2013/14") != k("SUSA FC ECNL RL B2013/14")
+    assert k("Wake FC N1 B 2013 Academy South (NC)") != k("Wake FC N1 B 2013 South (NC)")
+
+def test_canonical_names_picks_most_used():
+    games = [g("Capital FC G2012/13", "B", 1, 0), g("Capital FC G2012/13", "C", 1, 0), g("Capital FC G2012/2013", "D", 1, 0)]
+    canon, merges = rate.canonical_names(games)
+    assert canon["Capital FC G2012/2013"] == "Capital FC G2012/13" and len(merges) == 1

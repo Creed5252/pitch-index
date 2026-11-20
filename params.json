@@ -3,7 +3,7 @@
   "margin_cap": 4,
   "ridge_lambda": 1.0,
   "event_weight": 1.0,
-  "min_games": 6,
+  "min_games": 1,
   "national_threshold": 0.8,
   "season_start": "2026-08-01",
   "stability_variants": [
