@@ -113,12 +113,54 @@ def rank_order(ratings, eligible, comp_of, national):
     return ranks
 
 
-def rate_table(games, p):
+def club_key(team):
+    """Club identity across age groups: the team name before the league tag (e.g. 'Solar SC
+    ECNL B2010/11' -> 'solarsc'). Used only to bridge disconnected parts of a national table."""
+    base = re.split(r"\s+ECNL\b|\s+RL\b|\s+[BG](?:20)?\d\d", team or "", maxsplit=1, flags=re.I)[0]
+    return name_key(base)
+
+
+def split_key(key):
+    m = re.match(r"^(.*) (Boys|Girls) (.+)$", key)
+    return (m.group(1), m.group(2), m.group(3)) if m else (key, "", "")
+
+
+def bridge_offsets(ratings, comps, ref, min_links):
+    """Put disconnected groups of a forced-national table on one scale.
+
+    ref maps club -> standardized strength (z) from the same clubs' teams in other, connected age
+    groups. Each group gets the offset that best lines its teams up with their clubs' strength
+    (median of the gaps). Returns offsets, standard errors, and how many teams were linked."""
+    main = [ratings[t] for t in comps[0]]
+    sd = float(np.std(main)) if len(main) > 1 and np.std(main) > 0 else 1.0
+    off, se, links = {}, {}, {}
+    for i, c in enumerate(comps):
+        gaps = [sd * ref[club_key(t)] - ratings[t] for t in c if club_key(t) in ref]
+        links[i] = len(gaps)
+        if len(gaps) >= min_links:
+            off[i] = float(np.median(gaps))
+            se[i] = float(1.253 * np.std(gaps) / np.sqrt(len(gaps))) if len(gaps) > 1 else sd
+    known = list(off.values())
+    fill = float(np.median(known)) if known else 0.0
+    for i in range(len(comps)):
+        if i not in off:
+            off[i], se[i] = fill, sd
+    return off, se, links
+
+
+def rate_table(games, p, force_national=False, ref=None):
     ratings, hfa = solve(games, p["margin_cap"], p["ridge_lambda"], p["event_weight"])
     comps = components(games)
     share = len(comps[0]) / sum(len(c) for c in comps)
-    national = share >= p["national_threshold"]
+    connected = share >= p["national_threshold"]
+    national = connected or force_national
     comp_of = {t: i for i, c in enumerate(comps) for t in c}
+    min_links = p.get("bridge_min_links", 3)
+    bridged = force_national and len(comps) > 1
+    off = se = links = None
+    if bridged:
+        off, se, links = bridge_offsets(ratings, comps, ref or {}, min_links)
+        ratings = {t: r + off[comp_of[t]] for t, r in ratings.items()}
     st = {t: dict(gp=0, w=0, d=0, l=0, gf=0, ga=0, opp=[], conf=collections.Counter()) for t in ratings}
     for g in games:
         for t, o, f, a, c in ((g["home"], g["away"], g["hs"], g["as_"], g.get("conf_home")),
@@ -133,25 +175,66 @@ def rate_table(games, p):
         cnt = collections.Counter(team_conf[t] for t in c if team_conf[t])
         top = [k for k, _ in cnt.most_common(3)]
         labels.append(" / ".join(top) if top else "Unaffiliated")
-    eligible = [t for t in ratings if st[t]["gp"] >= p["min_games"] and (not national or comp_of[t] == 0)]
+    in_list = (lambda t: True) if (bridged or not national) else (lambda t: comp_of[t] == 0)
+    eligible = [t for t in ratings if st[t]["gp"] >= p["min_games"] and in_list(t)]
     base = rank_order(ratings, eligible, comp_of, national)
     lo, hi = dict(base), dict(base)
+
+    def widen(r):
+        for t, rk in rank_order(r, eligible, comp_of, national).items():
+            lo[t] = min(lo[t], rk); hi[t] = max(hi[t], rk)
+
     for v in p.get("stability_variants", []):
         q = {**p, **v}
         r2, _ = solve(games, q["margin_cap"], q["ridge_lambda"], q["event_weight"])
-        for t, rk in rank_order(r2, eligible, comp_of, national).items():
-            lo[t] = min(lo[t], rk); hi[t] = max(hi[t], rk)
+        if bridged:
+            o2, _, _ = bridge_offsets(r2, comps, ref or {}, min_links)
+            r2 = {t: r + o2[comp_of[t]] for t, r in r2.items()}
+        widen(r2)
+    if bridged:  # the bridge itself is an estimate: move each linked group up and down by its error
+        for sign in (1, -1):
+            for i in range(1, len(comps)):
+                widen({t: r + (sign * 1.96 * se[i] if comp_of[t] == i else 0) for t, r in ratings.items()})
     rows = []
     for t in eligible:
         s = st[t]
-        rows.append(dict(team=t, conf=team_conf[t], group=comp_of[t], rank=base[t], range=[lo[t], hi[t]],
-                         rating=round(float(ratings[t]), 3), sos=round(float(np.mean(s["opp"])), 3),
-                         gp=s["gp"], w=s["w"], d=s["d"], l=s["l"], gf=s["gf"], ga=s["ga"]))
+        row = dict(team=t, conf=team_conf[t], group=comp_of[t], rank=base[t], range=[lo[t], hi[t]],
+                   rating=round(float(ratings[t]), 3), sos=round(float(np.mean(s["opp"])), 3),
+                   gp=s["gp"], w=s["w"], d=s["d"], l=s["l"], gf=s["gf"], ga=s["ga"])
+        if bridged and comp_of[t] != 0:
+            row["link"] = "bridged" if links[comp_of[t]] >= min_links else "unlinked"
+        rows.append(row)
     rows.sort(key=lambda r: (r["group"] if not national else 0, r["rank"]))
     used = sorted({r["group"] for r in rows})
-    return dict(national=national, main_share=round(share, 3), groups=len(comps),
-                group_labels={str(i): labels[i] for i in used},
-                home_edge=round(hfa, 3), games=len(games), table=rows)
+    out = dict(national=national, main_share=round(share, 3), groups=len(comps),
+               group_labels={str(i): labels[i] for i in used},
+               home_edge=round(hfa, 3), games=len(games), table=rows)
+    if bridged:
+        out["bridge"] = dict(groups=len(comps),
+                             linked_groups=sum(1 for i in range(1, len(comps)) if links[i] >= min_links),
+                             unlinked_groups=sum(1 for i in range(1, len(comps)) if links[i] < min_links),
+                             teams_cross_played=len(comps[0]),
+                             teams_bridged=sum(1 for r in rows if r.get("link") == "bridged"),
+                             teams_unlinked=sum(1 for r in rows if r.get("link") == "unlinked"))
+    return out
+
+
+def club_strength(res, p, league_list, gender, skip_age):
+    """Club -> mean standardized rating across connected tables of the given leagues and gender."""
+    acc = collections.defaultdict(list)
+    for k, v in res.items():
+        lg, g, age = split_key(k)
+        if lg not in league_list or g != gender or age == skip_age:
+            continue
+        if v["main_share"] < p["national_threshold"]:
+            continue
+        rows = [r for r in v["table"] if r["group"] == 0 and not r.get("link")]
+        if len(rows) < 5:
+            continue
+        m = np.mean([r["rating"] for r in rows]); s = np.std([r["rating"] for r in rows]) or 1.0
+        for r in rows:
+            acc[club_key(r["team"])].append((r["rating"] - m) / s)
+    return {c: float(np.mean(z)) for c, z in acc.items()}
 
 
 def read_ledger(path, aliases):
@@ -182,10 +265,16 @@ def main():
     for g in games:
         tables[g["table"]].append(g)
     res = {k: rate_table(v, p) for k, v in sorted(tables.items())}
+    forced = p.get("always_national", {})
+    for k in sorted(tables):
+        lg, g, age = split_key(k)
+        if lg in forced and res[k]["groups"] > 1:
+            ref = club_strength(res, p, forced[lg], g, age)
+            res[k] = rate_table(tables[k], p, force_national=True, ref=ref)
     os.makedirs(out, exist_ok=True)
     json.dump(dict(week=a.week, methodology=p["version"], name_merges=merges, tables=res), open(os.path.join(out, "tables.json"), "w"), indent=1)
     for k, v in res.items():
-        print(f'{k:28s} games={v["games"]:5d} ranked={len(v["table"]):4d} {"national" if v["national"] else "by group (%d)" % v["groups"]}')
+        print(f'{k:28s} games={v["games"]:5d} ranked={len(v["table"]):4d} {("national (bridged %d groups)" % v["groups"]) if "bridge" in v else "national" if v["national"] else "by group (%d)" % v["groups"]}')
 
 
 if __name__ == "__main__":
