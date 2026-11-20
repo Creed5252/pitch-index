@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "margin_cap": 4,
   "ridge_lambda": 1.0,
   "event_weight": 1.0,
@@ -7,8 +7,33 @@
   "national_threshold": 0.8,
   "season_start": "2026-08-01",
   "stability_variants": [
-    {"margin_cap": 3}, {"margin_cap": 5},
-    {"ridge_lambda": 0.5}, {"ridge_lambda": 2.0},
-    {"event_weight": 0.75}, {"event_weight": 1.5}
-  ]
+    {
+      "margin_cap": 3
+    },
+    {
+      "margin_cap": 5
+    },
+    {
+      "ridge_lambda": 0.5
+    },
+    {
+      "ridge_lambda": 2.0
+    },
+    {
+      "event_weight": 0.75
+    },
+    {
+      "event_weight": 1.5
+    }
+  ],
+  "always_national": {
+    "ECNL": [
+      "ECNL"
+    ],
+    "ECNL RL": [
+      "ECNL RL",
+      "ECNL"
+    ]
+  },
+  "bridge_min_links": 3
 }

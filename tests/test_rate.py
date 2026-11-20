@@ -44,3 +44,22 @@ def test_canonical_names_picks_most_used():
     games = [g("Capital FC G2012/13", "B", 1, 0), g("Capital FC G2012/13", "C", 1, 0), g("Capital FC G2012/2013", "D", 1, 0)]
     canon, merges = rate.canonical_names(games)
     assert canon["Capital FC G2012/2013"] == "Capital FC G2012/13" and len(merges) == 1
+
+def test_club_key_strips_league_and_years():
+    assert rate.club_key("Solar SC ECNL B2010/11") == rate.club_key("SOLAR SC ECNL RL G2013/14") == "solarsc"
+
+def test_bridge_ranks_every_team_in_one_list():
+    # two conferences that never met; club strength from another age says East is stronger
+    games = [g("East1 ECNL B10", "East2 ECNL B10", 1, 0), g("East2 ECNL B10", "East3 ECNL B10", 1, 0),
+             g("West1 ECNL B10", "West2 ECNL B10", 1, 0), g("West2 ECNL B10", "West3 ECNL B10", 1, 0)]
+    ref = {"east1": 2.0, "east2": 1.5, "east3": 1.0, "west1": -1.0, "west2": -1.5, "west3": -2.0}
+    out = rate.rate_table(games, dict(P, bridge_min_links=3), force_national=True, ref=ref)
+    assert out["national"] and len(out["table"]) == 6 and "bridge" in out
+    order = [r["team"].split()[0] for r in out["table"]]
+    assert order[:3] == ["East1", "East2", "East3"]
+    assert all(r.get("link") == "bridged" for r in out["table"] if r["team"].startswith("West"))
+
+def test_unlinked_group_is_flagged():
+    games = [g("A1 ECNL B10", "A2 ECNL B10", 1, 0), g("Z1 ECNL B10", "Z2 ECNL B10", 1, 0)]
+    out = rate.rate_table(games, dict(P, bridge_min_links=3), force_national=True, ref={})
+    assert {r.get("link") for r in out["table"] if r["group"] != 0} == {"unlinked"}
