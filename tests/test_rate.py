@@ -50,16 +50,33 @@ def test_club_key_strips_league_and_years():
 
 def test_bridge_ranks_every_team_in_one_list():
     # two conferences that never met; club strength from another age says East is stronger
-    games = [g("East1 ECNL B10", "East2 ECNL B10", 1, 0), g("East2 ECNL B10", "East3 ECNL B10", 1, 0),
-             g("West1 ECNL B10", "West2 ECNL B10", 1, 0), g("West2 ECNL B10", "West3 ECNL B10", 1, 0)]
-    ref = {"east1": 2.0, "east2": 1.5, "east3": 1.0, "west1": -1.0, "west2": -1.5, "west3": -2.0}
+    games = [g("EastA ECNL B10", "EastB ECNL B10", 1, 0), g("EastB ECNL B10", "EastC ECNL B10", 1, 0),
+             g("WestA ECNL B10", "WestB ECNL B10", 1, 0), g("WestB ECNL B10", "WestC ECNL B10", 1, 0)]
+    ref = {"easta": 2.0, "eastb": 1.5, "eastc": 1.0, "westa": -1.0, "westb": -1.5, "westc": -2.0}
     out = rate.rate_table(games, dict(P, bridge_min_links=3), force_national=True, ref=ref)
     assert out["national"] and len(out["table"]) == 6 and "bridge" in out
     order = [r["team"].split()[0] for r in out["table"]]
-    assert order[:3] == ["East1", "East2", "East3"]
+    assert order[:3] == ["EastA", "EastB", "EastC"]
     assert all(r.get("link") == "bridged" for r in out["table"] if r["team"].startswith("West"))
 
 def test_unlinked_group_is_flagged():
     games = [g("A1 ECNL B10", "A2 ECNL B10", 1, 0), g("Z1 ECNL B10", "Z2 ECNL B10", 1, 0)]
     out = rate.rate_table(games, dict(P, bridge_min_links=3), force_national=True, ref={})
     assert {r.get("link") for r in out["table"] if r["group"] != 0} == {"unlinked"}
+
+def test_tie_band_breaks_on_goal_difference():
+    r = {"A": 0.51, "B": 0.55, "C": 0.30}
+    tb = {"A": (2.0, 3.0, 1.0, 4), "B": (1.0, 2.0, 1.0, 4), "C": (5.0, 5.0, 0.0, 4)}
+    ranks = rate.rank_order(r, ["A", "B", "C"], {}, True, tb, 0.1)
+    assert ranks == {"A": 1, "B": 2, "C": 3}   # A and B share a band, A has better GD; C is a lower band
+
+def test_club_key_strips_team_numbers():
+    assert rate.club_key("AC Brea (2)") == rate.club_key("AC Brea") == rate.club_key("AC Brea 2")
+
+def test_regions_from_conference_and_event():
+    games = [dict(home="W1", away="W2", hs=1, as_=0, neutral=False, conf_home="PACNW", conf_away="PACNW"),
+             dict(home="W1", away="X", hs=1, as_=0, neutral=True, event="ev W")]
+    p = dict(P, regions={"EA": {"conferences": {"West": ["PACNW"], "East": ["Texas"]}, "events": {"ev W": "West"}}})
+    out = rate.rate_table(games, p, league="EA")
+    assert {r["team"]: r.get("region") for r in out["table"]} == {"W1": "West", "W2": "West", "X": "West"}
+    assert out["regions"] == ["West"]

@@ -69,7 +69,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
   <li><a href="#home">Home field</a></li>
   <li><a href="#events">Showcases and national qualifiers</a></li>
   <li><a href="#who">Who gets ranked</a></li>
-  <li><a href="#range">The rank range</a></li>
+  <li><a href="#range">Ties and early-season tiers</a></li>
   <li><a href="#names">Team name cleanup</a></li>
   <li><a href="#leagues">League-by-league structure</a></li>
   <li><a href="#cadence">Weekly cadence and history</a></li>
@@ -121,16 +121,17 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
 <p>Some events (for example the EA Winter Qualifier) have not been played yet for older age groups. Rankings still publish for those ages; they will shift once those games are in. That movement is expected and is shown in the weekly change column.</p>
 
 <h2 id="who">7. Who gets ranked, and when a table is "national"</h2>
-<p>Every team with at least one scored game is ranked; there is no minimum. Early in the season, and for teams that have played only a few games, the rank range is wider and the spot will move more as results come in. A table is published as one <strong>national</strong> list when at least 80% of its teams are linked together through games, directly or through common opponents. When a table is less connected than that (often early in the season, or in leagues that play only inside regions), we publish it <strong>by conference or region</strong> instead of pretending we can compare teams that have no games in common. <strong>ECNL and ECNL RL are always one national list.</strong> Their conferences already rank teams by region, so a conference-only table adds nothing. When conferences have not yet met at a national event, we place each unconnected conference on the national scale using its clubs: a club whose other ECNL teams (other age groups, linked through national events) rate well lifts its conference. Teams placed this way are marked <em>est.</em> and get wider rank ranges, because the placement is an estimate, not a result. If a conference has fewer than 3 teams with a club link, it is marked <em>no link yet</em>. As national events are played, real results replace the estimate.</p>
+<p>Every team with at least one scored game is ranked; there is no minimum. Early in the season, and for teams that have played only a few games, the rank range is wider and the spot will move more as results come in. A table is published as one <strong>national</strong> list when at least 80% of its teams are linked together through games, directly or through common opponents. When a table is less connected than that (often early in the season, or in leagues that play only inside regions), we publish it <strong>by conference or region</strong> instead of pretending we can compare teams that have no games in common. <strong>Every league is published as one national list</strong> (ECNL, ECNL RL, EA, EA2, GA, DPL and N1L). Their conferences and divisions already rank teams locally, so a conference-only table adds nothing. EA, GA and DPL also offer <strong>West region</strong> and <strong>East region</strong> views, and N1L a conference filter: the same national ratings, filtered and numbered within the selection. N1L Premier 1 and Premier 2 are separate lists and are never ranked against each other. When conferences have not yet met at a national event, we place each unconnected conference on the national scale using its clubs: a club whose other teams in the league (other age groups, linked through national events) rate well lifts its conference. Teams placed this way are marked <em>est.</em>, because the placement is an estimate, not a result. If a conference has fewer than 3 teams with a club link, it is marked <em>no link yet</em>. As national events are played, real results replace the estimate.</p>
 
-<h2 id="range">8. The rank range (what "stability range" means)</h2>
-<p>Next to each rank we show a small range, like <code>#4 (3–6)</code>. It answers one question: <strong>how sure are we about this spot?</strong></p>
-<p>We re-run the rankings six extra times with slightly different reasonable settings (a lower and higher margin cap, more and less shrinkage, showcases weighted a bit less and a bit more). The range is the best and worst rank the team got across those runs.</p>
-<ul>
-  <li><strong>Tight range</strong> (for example 4–4 or 3–5): the ranking holds up no matter how you tweak the rules.</li>
-  <li><strong>Wide range</strong> (for example 4–15): the team's spot depends on judgment calls, usually because it has few games or few games against the rest of the field. Treat that rank as provisional.</li>
-</ul>
-
+<h2 id="range">8. Ties and early-season tiers</h2>
+<p>Every table is ranked in tiers, so a ranking exists from the first weekend, whether or not national events have been played.</p>
+<ol>
+  <li><strong>Rating</strong>, read in bands of 0.10 goals. Teams in the same band are treated as tied.</li>
+  <li><strong>Goal difference per game</strong> breaks the tie.</li>
+  <li><strong>Goals for per game</strong>, then <strong>fewest goals against per game</strong>.</li>
+  <li><strong>More games played</strong>, then team name.</li>
+</ol>
+<p>Early in the season most comparisons across conferences are estimates (<em>est.</em>), so these result-based tiers do more of the work. As national events connect the conferences, the rating does more and the tiers matter less. We still compute a rank range from six alternate runs and publish it in the data files for anyone checking our work; it is no longer shown on the rankings page.</p>
 <h2 id="names">9. Team name cleanup</h2>
 <p>The same team often appears under slightly different names across schedules ("Bay Area Surf - ECNL G10" vs "Bay Area Surf ECNL G10", extra spaces, birth-year formats). Before rating, every name passes through a cleanup step: spacing and separators are normalized, and known aliases are mapped to one canonical team. Every alias we merge is listed publicly in <code>teams/aliases.csv</code> on GitHub. If you see a split or wrong merge, tell us and we fix it in the next weekly run.</p>
 
@@ -141,11 +142,11 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
   <tr><td>MLS NEXT</td><td>Boys</td><td>U13–U19</td><td>Conferences; national when connected</td><td>Pending: scores not yet public this season</td></tr>
   <tr><td>ECNL</td><td>Boys, Girls</td><td>U13–U18/19</td><td>Always national (club-linked where conferences have not met)</td><td>AthleteOne (TotalGlobalSports)</td></tr>
   <tr><td>ECNL RL</td><td>Boys, Girls</td><td>U13–U18/19</td><td>Always national (club-linked where conferences have not met)</td><td>AthleteOne (TotalGlobalSports)</td></tr>
-  <tr><td>Elite Academy (EA)</td><td>Boys</td><td>U13–U19</td><td>Divisions; East / West; includes national qualifiers</td><td>Modular11</td></tr>
-  <tr><td>EA2</td><td>Boys</td><td>U13–U19</td><td>Divisions</td><td>Modular11</td></tr>
-  <tr><td>Girls Academy (GA)</td><td>Girls</td><td>U13–U19</td><td>Conferences; national when connected</td><td>GotSport</td></tr>
-  <tr><td>DPL</td><td>Girls</td><td>U13–U19</td><td>Conferences</td><td>GotSport</td></tr>
-  <tr><td>National League (N1L)</td><td>Boys, Girls</td><td>U13–U19</td><td>Districts, Tier 1 and Tier 2</td><td>GotSport</td></tr>
+  <tr><td>Elite Academy (EA)</td><td>Boys</td><td>U13–U19</td><td>Always national, plus West / East region views; includes regional showcases</td><td>Modular11</td></tr>
+  <tr><td>EA2</td><td>Boys</td><td>U11–U19</td><td>Always national (Southern California and Oregon)</td><td>Modular11</td></tr>
+  <tr><td>Girls Academy (GA)</td><td>Girls</td><td>U13–U19</td><td>Always national, plus West / East region views (West = Frontier, Mountain West, Northwest, Pacific-Northwest, Southwest, as at GA’s West Regional)</td><td>GotSport</td></tr>
+  <tr><td>DPL</td><td>Girls</td><td>U11–U19</td><td>Always national, plus West / East region views (West = conferences at DPL’s Western Regionals)</td><td>GotSport</td></tr>
+  <tr><td>National 1 League (N1L)</td><td>Boys, Girls</td><td>U13–U19</td><td>Always national, Premier 1 and Premier 2 ranked as separate lists, conference filter</td><td>GotSport</td></tr>
 </table>
 
 <h2 id="cadence">11. Weekly cadence and history</h2>
@@ -160,7 +161,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
 <h2 id="limits">12. Known limits</h2>
 <ul>
   <li>Results only. We do not use rosters, player movement, injuries or scouting.</li>
-  <li>Early in the season, conference-only play limits how well regions can be compared. The rank range shows this honestly.</li>
+  <li>Early in the season, conference-only play limits how well regions can be compared. Teams placed by club link are marked est. until national events connect them.</li>
   <li>Some leagues post scores late. A missing score is a missing game until the league posts it.</li>
   <li>Cross-league games (for example ECNL vs MLS NEXT) are not used in v1.</li>
 </ul>
@@ -244,6 +245,8 @@ python model/rate.py --week 2026-12-08</pre>
 <details><summary>Changelog <span class="tag">versions</span></summary>
 <table>
   <tr><th>Version</th><th>Date</th><th>Change</th></tr>
+  <tr><td>1.3</td><td>Nov 20, 2026</td><td>GA, DPL and N1L always national; GA/DPL West/East views; N1L Premier 1 / Premier 2 lists and conference filter; club links accepted from any main group that spans 2+ conferences with 20+ teams.</td></tr>
+  <tr><td>1.2</td><td>Nov 20, 2026</td><td>Tie tiers (0.10 band, then GD, GF, GA per game); EA and EA2 always national; EA West/East region views; rank range removed from the page; GD column; Rating/SoS explainers.</td></tr>
   <tr><td>1.1</td><td>Nov 20, 2026</td><td>ECNL and ECNL RL always ranked as one national list; unconnected conferences placed by club link and marked est.</td></tr>
   <tr><td>1.0</td><td>Dec 3, 2026</td><td>Launch: ridge-regularized margin model, cap 4, λ 1.0, no minimum games, 80% national threshold.</td></tr>
 </table>
