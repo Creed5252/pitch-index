@@ -1,8 +1,15 @@
+The Pitch Index — License
+
 Copyright (c) 2026 Modern Wealth Model. All rights reserved.
 
-The source code in this repository is published for transparency and verification only.
-You may view and run it to reproduce published Pitch Index results. No other right to copy,
-modify, distribute or use the code is granted without written permission.
+This repository has two parts with two different licenses.
 
-PENDING CREED DECISION: whether the game ledgers and tables in runs/ should instead carry an
-open data license (for example CC BY 4.0) so others can cite and reuse them.
+1. CODE (everything outside the runs/ folder, including model/, tests/, params.json and docs/)
+   All rights reserved. The code is published so anyone can read it and run it to reproduce
+   published Pitch Index results. No other right to copy, modify, distribute, sublicense or
+   use the code, in whole or in part, is granted without written permission.
+
+2. RANKINGS AND GAME DATA (the runs/ folder, and the published rankings on pitchnetwork.org)
+   Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+   Full text: https://creativecommons.org/licenses/by/4.0/legalcode
+   See LICENSE-DATA.md for how to credit.
