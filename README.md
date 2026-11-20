@@ -37,6 +37,11 @@ pip install numpy pytest
 python -m pytest -q tests
 ```
 
+## License
+
+- **Rankings and game data** (`runs/`): free to share and reuse with credit, under CC BY 4.0. See `LICENSE-DATA.md`.
+- **Code**: all rights reserved; published so anyone can read and run it to verify results. See `LICENSE`.
+
 ## Corrections
 
 Wrong team name, a split team, or a missing game: open an issue with the league, age group and match. Fixes land in the next weekly run and are noted in `CHANGELOG.md`. Past weeks are never edited.
