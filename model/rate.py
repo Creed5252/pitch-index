@@ -6,7 +6,7 @@ an estimated home edge for league games; showcase/qualifier games are neutral.
 
 Usage: python model/rate.py --week 2026-11-16 [--ledger PATH] [--out DIR]
 """
-import argparse, collections, csv, json, os, re
+import argparse, collections, csv, json, math, os, re
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -97,18 +97,30 @@ def components(games):
     return sorted(comps, key=len, reverse=True)
 
 
-def rank_order(ratings, eligible, comp_of, national):
+def tier_key(ratings, tb, band):
+    """Ranking tiers. Tier 1 is the rating, read in bands of `band` goals: two teams in the same
+    band are treated as tied. Ties are broken by goal difference per game, then goals for per
+    game, then fewest goals against per game, then more games played, then name."""
+    def key(t):
+        gd, gf, ga, gp = tb.get(t, (0.0, 0.0, 0.0, 0)) if tb else (0.0, 0.0, 0.0, 0)
+        tier = math.floor(ratings[t] / band + 1e-9) if band else ratings[t]
+        return (-tier, -gd, -gf, ga, -gp, t)
+    return key
+
+
+def rank_order(ratings, eligible, comp_of, national, tb=None, band=0.0):
     """Rank list: national -> one list; otherwise ranks within each connected group."""
     ranks = {}
+    key = tier_key(ratings, tb, band)
     if national:
-        for i, t in enumerate(sorted(eligible, key=lambda t: -ratings[t]), 1):
+        for i, t in enumerate(sorted(eligible, key=key), 1):
             ranks[t] = i
     else:
         by = collections.defaultdict(list)
         for t in eligible:
             by[comp_of[t]].append(t)
         for grp in by.values():
-            for i, t in enumerate(sorted(grp, key=lambda t: -ratings[t]), 1):
+            for i, t in enumerate(sorted(grp, key=key), 1):
                 ranks[t] = i
     return ranks
 
@@ -116,7 +128,8 @@ def rank_order(ratings, eligible, comp_of, national):
 def club_key(team):
     """Club identity across age groups: the team name before the league tag (e.g. 'Solar SC
     ECNL B2010/11' -> 'solarsc'). Used only to bridge disconnected parts of a national table."""
-    base = re.split(r"\s+ECNL\b|\s+RL\b|\s+[BG](?:20)?\d\d", team or "", maxsplit=1, flags=re.I)[0]
+    base = re.split(r"\s+ECNL\b|\s+RL\b|\s+EA2?\b|\s+[BG](?:20)?\d\d", team or "", maxsplit=1, flags=re.I)[0]
+    base = re.sub(r"\s*\(?\d\)?\s*$", "", base)   # second teams: 'AC Brea (2)', 'Rangers FC 2'
     return name_key(base)
 
 
@@ -148,7 +161,7 @@ def bridge_offsets(ratings, comps, ref, min_links):
     return off, se, links
 
 
-def rate_table(games, p, force_national=False, ref=None):
+def rate_table(games, p, force_national=False, ref=None, league=None):
     ratings, hfa = solve(games, p["margin_cap"], p["ridge_lambda"], p["event_weight"])
     comps = components(games)
     share = len(comps[0]) / sum(len(c) for c in comps)
@@ -175,13 +188,26 @@ def rate_table(games, p, force_national=False, ref=None):
         cnt = collections.Counter(team_conf[t] for t in c if team_conf[t])
         top = [k for k, _ in cnt.most_common(3)]
         labels.append(" / ".join(top) if top else "Unaffiliated")
+    reg = p.get("regions", {}).get(league or "", {})
+    region = {}
+    if reg:
+        conf_map = {c: r for r, cs in reg.get("conferences", {}).items() for c in cs}
+        ev = collections.defaultdict(collections.Counter)
+        for g in games:
+            r = reg.get("events", {}).get(g.get("event") or "")
+            if r:
+                ev[g["home"]][r] += 1; ev[g["away"]][r] += 1
+        for t in st:
+            region[t] = conf_map.get(team_conf[t]) or (ev[t].most_common(1)[0][0] if ev[t] else None)
+    tb = {t: ((s["gf"] - s["ga"]) / s["gp"], s["gf"] / s["gp"], s["ga"] / s["gp"], s["gp"]) for t, s in st.items() if s["gp"]}
+    band = p.get("tie_band", 0.0)
     in_list = (lambda t: True) if (bridged or not national) else (lambda t: comp_of[t] == 0)
     eligible = [t for t in ratings if st[t]["gp"] >= p["min_games"] and in_list(t)]
-    base = rank_order(ratings, eligible, comp_of, national)
+    base = rank_order(ratings, eligible, comp_of, national, tb, band)
     lo, hi = dict(base), dict(base)
 
     def widen(r):
-        for t, rk in rank_order(r, eligible, comp_of, national).items():
+        for t, rk in rank_order(r, eligible, comp_of, national, tb, band).items():
             lo[t] = min(lo[t], rk); hi[t] = max(hi[t], rk)
 
     for v in p.get("stability_variants", []):
@@ -200,7 +226,9 @@ def rate_table(games, p, force_national=False, ref=None):
         s = st[t]
         row = dict(team=t, conf=team_conf[t], group=comp_of[t], rank=base[t], range=[lo[t], hi[t]],
                    rating=round(float(ratings[t]), 3), sos=round(float(np.mean(s["opp"])), 3),
-                   gp=s["gp"], w=s["w"], d=s["d"], l=s["l"], gf=s["gf"], ga=s["ga"])
+                   gp=s["gp"], w=s["w"], d=s["d"], l=s["l"], gf=s["gf"], ga=s["ga"], gd=s["gf"] - s["ga"])
+        if region.get(t):
+            row["region"] = region[t]
         if bridged and comp_of[t] != 0:
             row["link"] = "bridged" if links[comp_of[t]] >= min_links else "unlinked"
         rows.append(row)
@@ -209,6 +237,8 @@ def rate_table(games, p, force_national=False, ref=None):
     out = dict(national=national, main_share=round(share, 3), groups=len(comps),
                group_labels={str(i): labels[i] for i in used},
                home_edge=round(hfa, 3), games=len(games), table=rows)
+    if reg:
+        out["regions"] = [r for r in reg.get("conferences", {}) if any(x.get("region") == r for x in rows)]
     if bridged:
         out["bridge"] = dict(groups=len(comps),
                              linked_groups=sum(1 for i in range(1, len(comps)) if links[i] >= min_links),
@@ -245,7 +275,7 @@ def read_ledger(path, aliases):
         out.append(dict(table=f'{r["league"]} {r["gender"]} {r["age"]}',
                         home=clean_team(r["home"], aliases), away=clean_team(r["away"], aliases),
                         hs=int(r["hs"]), as_=int(r["as"]), neutral=r["neutral"] in ("1", "true", "True"),
-                        date=r["date"], conf_home=r.get("conf_home") or None, conf_away=r.get("conf_away") or None))
+                        date=r["date"], event=r.get("event") or None, conf_home=r.get("conf_home") or None, conf_away=r.get("conf_away") or None))
     return out
 
 
@@ -264,13 +294,13 @@ def main():
     tables = collections.defaultdict(list)
     for g in games:
         tables[g["table"]].append(g)
-    res = {k: rate_table(v, p) for k, v in sorted(tables.items())}
+    res = {k: rate_table(v, p, league=split_key(k)[0]) for k, v in sorted(tables.items())}
     forced = p.get("always_national", {})
     for k in sorted(tables):
         lg, g, age = split_key(k)
         if lg in forced and res[k]["groups"] > 1:
             ref = club_strength(res, p, forced[lg], g, age)
-            res[k] = rate_table(tables[k], p, force_national=True, ref=ref)
+            res[k] = rate_table(tables[k], p, force_national=True, ref=ref, league=lg)
     os.makedirs(out, exist_ok=True)
     json.dump(dict(week=a.week, methodology=p["version"], name_merges=merges, tables=res), open(os.path.join(out, "tables.json"), "w"), indent=1)
     for k, v in res.items():

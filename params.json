@@ -1,5 +1,5 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "margin_cap": 4,
   "ridge_lambda": 1.0,
   "event_weight": 1.0,
@@ -33,7 +33,42 @@
     "ECNL RL": [
       "ECNL RL",
       "ECNL"
+    ],
+    "EA": [
+      "EA"
+    ],
+    "EA2": [
+      "EA2",
+      "EA"
     ]
   },
-  "bridge_min_links": 3
+  "bridge_min_links": 3,
+  "tie_band": 0.1,
+  "regions": {
+    "EA": {
+      "conferences": {
+        "West": [
+          "PACNW",
+          "Nor Cal",
+          "Southwest",
+          "Southwest (North)",
+          "Southwest (South)",
+          "Southwest Desert",
+          "Southwest EA"
+        ],
+        "East": [
+          "Mid-America",
+          "Southeast",
+          "Northeast (East)",
+          "Northeast (West)",
+          "Florida",
+          "Texas"
+        ]
+      },
+      "events": {
+        "EA event 97": "West",
+        "EA event 101": "East"
+      }
+    }
+  }
 }
