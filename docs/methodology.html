@@ -54,7 +54,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
   <strong>The one-minute version</strong>
   <ol>
     <li>We collect every scored game in each elite league, plus the showcase, qualifier and cross-league events those teams play in.</li>
-    <li>Each game tells us one thing: how much better one team was than the other that day, measured by goal margin, capped at 4.</li>
+    <li>Each game tells us one thing: how much better one team was than the other that day, measured by goal margin, capped at 6.</li>
     <li>We solve for the single set of team ratings that best explains every result at once. Beating a strong team moves you up more than beating a weak one. That is strength of schedule, built in.</li>
     <li>Rankings refresh every Tuesday morning. Every game, every rating, and every past week's table is published on GitHub so anyone can check our work.</li>
   </ol>
@@ -96,7 +96,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
 <p>This is the part most rankings hide. Here is everything that affects how much a single game moves a rating.</p>
 <table>
   <tr><th>Factor</th><th>What we do</th><th>Why</th></tr>
-  <tr><td>Goal margin</td><td>Counted, up to <strong>±4</strong>. A 9–0 counts the same as 4–0.</td><td>Margin carries more information than win/loss, but blowouts mostly measure a mismatch and invite running up scores.</td></tr>
+  <tr><td>Goal margin</td><td>Counted, up to <strong>±6</strong>. A 9–0 counts as 6–0.</td><td>Margin carries more information than win/loss, so a team that wins big is rewarded and a team that gets blown out pays for it. The cap only trims the most lopsided scores, so running up the score past six goals gains nothing. Goal difference itself is shown uncapped and is used to break ties.</td></tr>
   <tr><td>Win / draw / loss</td><td>No separate bonus. A 1–0 win is a +1 margin.</td><td>Keeps one clean signal. Records are still shown for context.</td></tr>
   <tr><td>Penalty shootouts</td><td>Counted as a draw (the regulation score).</td><td>Shootouts are close to a coin flip.</td></tr>
   <tr><td>Opponent strength</td><td>Built in: every result is compared to what the two ratings predicted.</td><td>This is strength of schedule. See section 4.</td></tr>
@@ -118,7 +118,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
 
 <h2 id="events">6. Showcases and national qualifiers</h2>
 <p>Most league seasons are played inside conferences, which means a Southwest team may never play a Southeast team in league play. Showcases, national events and qualifiers are where those teams meet. Those games act as <strong>bridges</strong>: they let the formula compare conferences that never play each other directly. More bridges mean a more trustworthy national ranking.</p>
-<p>Some events (for example the EA Winter Qualifier) have not been played yet for older age groups. Rankings still publish for those ages; they will shift once those games are in. That movement is expected and is shown in the weekly change column.</p>
+<p>Some events (for example the EA Winter Qualifier) have not been played yet for older age groups. Rankings still publish for those ages; they will shift once those games are in. That movement is expected.</p>
 
 <h2 id="who">7. Who gets ranked, and when a table is "national"</h2>
 <p>Every team with at least one scored game is ranked; there is no minimum. Early in the season, and for teams that have played only a few games, the rank range is wider and the spot will move more as results come in. A table is published as one <strong>national</strong> list when at least 80% of its teams are linked together through games, directly or through common opponents. When a table is less connected than that (often early in the season, or in leagues that play only inside regions), we publish it <strong>by conference or region</strong> instead of pretending we can compare teams that have no games in common. <strong>Every league is published as one national list</strong> (ECNL, ECNL RL, EA, EA2, GA, DPL and N1L). Their conferences and divisions already rank teams locally, so a conference-only table adds nothing. EA, GA and DPL also offer <strong>West region</strong> and <strong>East region</strong> views, and N1L a conference filter: the same national ratings, filtered and numbered within the selection. N1L Premier 1 and Premier 2 are separate lists and are never ranked against each other. When conferences have not yet met at a national event, we place each unconnected conference on the national scale using its clubs: a club whose other teams in the league (other age groups, linked through national events) rate well lifts its conference. Teams placed this way are marked <em>est.</em>, because the placement is an estimate, not a result. If a conference has fewer than 3 teams with a club link, it is marked <em>no link yet</em>. As national events are played, real results replace the estimate.</p>
@@ -139,7 +139,8 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
 <p>Each league is ranked inside its own structure. We never mix leagues in one table.</p>
 <table>
   <tr><th>League</th><th>Gender</th><th>Ages</th><th>How it is segmented</th><th>Results source</th></tr>
-  <tr><td>MLS NEXT</td><td>Boys</td><td>U13–U19</td><td>Conferences; national when connected</td><td>Pending: scores not yet public this season</td></tr>
+  <tr><td>MLS NEXT</td><td>Boys</td><td>U13–U19</td><td>Not included yet</td><td>MLS NEXT does not publish 2026-27 scores publicly. We will add it once its results are public.</td></tr>
+  <tr><td>National Academy League (NAL)</td><td>Boys, Girls</td><td>U13–U19</td><td>Not included yet</td><td>NAL runs regional conferences in the East and Midwest, most of them now as part of the MLS NEXT Academy Division. It will be reviewed alongside MLS NEXT.</td></tr>
   <tr><td>ECNL</td><td>Boys, Girls</td><td>U13–U18/19</td><td>Always national (club-linked where conferences have not met)</td><td>AthleteOne (TotalGlobalSports)</td></tr>
   <tr><td>ECNL RL</td><td>Boys, Girls</td><td>U13–U18/19</td><td>Always national (club-linked where conferences have not met)</td><td>AthleteOne (TotalGlobalSports)</td></tr>
   <tr><td>Elite Academy (EA)</td><td>Boys</td><td>U13–U19</td><td>Always national, plus West / East region views; includes regional showcases</td><td>Modular11</td></tr>
@@ -164,6 +165,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
   <li>Early in the season, conference-only play limits how well regions can be compared. Teams placed by club link are marked est. until national events connect them.</li>
   <li>Some leagues post scores late. A missing score is a missing game until the league posts it.</li>
   <li>Cross-league games (for example ECNL vs MLS NEXT) are not used in v1.</li>
+  <li><strong>N1L is the hardest league to rank nationally.</strong> It is organized far more regionally than the other elite leagues: districts play only inside themselves and there are no national qualifying events in the regular season. Its national lists lean on each team’s results and schedule inside its own district, so treat them as a rough national picture, most useful within a conference.</li>
 </ul>
 
 <h2 id="deep">13. Deep dives</h2>
@@ -182,7 +184,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
 <details><summary>Every parameter, in one table <span class="tag">parameters</span></summary>
 <table>
   <tr><th>Parameter</th><th class="num">Value</th><th>Tested range (rank range runs)</th></tr>
-  <tr><td>Margin cap</td><td class="num">4</td><td>3 and 5</td></tr>
+  <tr><td>Margin cap</td><td class="num">6</td><td>5 and 8</td></tr>
   <tr><td>Ridge λ (shrinkage)</td><td class="num">1.0</td><td>0.5 and 2.0</td></tr>
   <tr><td>Showcase / qualifier weight</td><td class="num">1.0</td><td>0.75 and 1.5</td></tr>
   <tr><td>Home edge</td><td class="num">estimated</td><td>—</td></tr>
@@ -198,12 +200,12 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
 <table>
   <tr><th>Step</th><th class="num">Value</th></tr>
   <tr><td>Raw average margin</td><td class="num">+3.43</td></tr>
-  <tr><td>After capping each game at ±4 (one 8–0, one 6–0 and one 5–0 trimmed)</td><td class="num">+2.93</td></tr>
-  <tr><td>Average opponent rating (SoS)</td><td class="num">+0.48</td></tr>
-  <tr><td>Margin + SoS</td><td class="num">+3.41</td></tr>
-  <tr><td>Published rating (after shrinkage and home edge)</td><td class="num"><strong>+3.20</strong></td></tr>
+  <tr><td>After capping each game at ±6 (one 8–0 trimmed to 6–0)</td><td class="num">+3.29</td></tr>
+  <tr><td>Average opponent rating (SoS)</td><td class="num">+0.61</td></tr>
+  <tr><td>Margin + SoS</td><td class="num">+3.90</td></tr>
+  <tr><td>Published rating (after shrinkage and home edge)</td><td class="num"><strong>+3.66</strong></td></tr>
 </table>
-<p>Compare #3 United Elite SC: a smaller average margin, but the 11th-toughest schedule in the table (SoS +0.92). Strength of schedule closes much of the gap.</p>
+<p>Compare #2 ALBION SC Santa Ana: a smaller average margin, but a tougher schedule (SoS +0.89). Strength of schedule closes most of the gap.</p>
 </details>
 
 <details><summary>How connectivity is checked <span class="tag">graph</span></summary>
@@ -211,7 +213,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid va
 </details>
 
 <details><summary>How the rank range is computed <span class="tag">stability</span></summary>
-<p>Six alternate runs, each changing one setting: cap 3, cap 5, λ 0.5, λ 2.0, event weight 0.75, event weight 1.5. For each team we record the best and worst rank across the base run plus those six. Nothing is averaged; the range is the honest min and max.</p>
+<p>Six alternate runs, each changing one setting: cap 5, cap 8, λ 0.5, λ 2.0, event weight 0.75, event weight 1.5. For each team we record the best and worst rank across the base run plus those six. Nothing is averaged; the range is the honest min and max.</p>
 </details>
 
 <details><summary>Data sources and how we collect them <span class="tag">sources</span></summary>
@@ -245,6 +247,7 @@ python model/rate.py --week 2026-12-08</pre>
 <details><summary>Changelog <span class="tag">versions</span></summary>
 <table>
   <tr><th>Version</th><th>Date</th><th>Change</th></tr>
+  <tr><td>1.4</td><td>Nov 20, 2026</td><td>Margin cap raised from 4 to 6 (stability runs at 5 and 8). MLS NEXT and NAL notes. N1L caveat.</td></tr>
   <tr><td>1.3</td><td>Nov 20, 2026</td><td>GA, DPL and N1L always national; GA/DPL West/East views; N1L Premier 1 / Premier 2 lists and conference filter; club links accepted from any main group that spans 2+ conferences with 20+ teams.</td></tr>
   <tr><td>1.2</td><td>Nov 20, 2026</td><td>Tie tiers (0.10 band, then GD, GF, GA per game); EA and EA2 always national; EA West/East region views; rank range removed from the page; GD column; Rating/SoS explainers.</td></tr>
   <tr><td>1.1</td><td>Nov 20, 2026</td><td>ECNL and ECNL RL always ranked as one national list; unconnected conferences placed by club link and marked est.</td></tr>

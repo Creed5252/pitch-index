@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4 — 2026-11-20
+- Margin cap 4 → 6; stability runs at cap 5 and 8 (decision 0010).
+- Methodology: MLS NEXT and NAL "not included yet" rows, N1L limits note, worked example updated.
+
 ## 1.3 — 2026-11-20
 - GA, DPL and N1L always national; GA/DPL West/East regions; N1L conference regions (decision 0009).
 - Ledger gains tier_home/tier_away (N1L Premier 1 / Premier 2); rows carry `tier`.
