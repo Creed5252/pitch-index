@@ -80,3 +80,10 @@ def test_regions_from_conference_and_event():
     out = rate.rate_table(games, p, league="EA")
     assert {r["team"]: r.get("region") for r in out["table"]} == {"W1": "West", "W2": "West", "X": "West"}
     assert out["regions"] == ["West"]
+
+def test_region_team_override_splits_a_conference():
+    games = [dict(home="Atletico Dallas", away="CF10 Houston FC", hs=1, as_=0, neutral=False, conf_home="Texas", conf_away="Texas")]
+    p = dict(P, regions={"EA": {"conferences": {"East": ["Texas"]},
+                                "team_overrides": [{"conference": "Texas", "pattern": "(?i)\\b(dallas|dfw|el paso)\\b", "region": "West"}]}})
+    out = rate.rate_table(games, p, league="EA")
+    assert {r["team"]: r.get("region") for r in out["table"]} == {"Atletico Dallas": "West", "CF10 Houston FC": "East"}

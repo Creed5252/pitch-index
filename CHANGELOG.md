@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.2 — 2026-11-20
+- EA regions: Texas splits. Dallas/DFW-metro clubs and El Paso are labeled West, the rest of Texas East (team_overrides in params; Creed's call from qualifier attendance).
+
 ## 1.4.1 — 2026-11-20
 - GA Aspire added as a league: always ranked as one national list, with GA as the club-link reference (GA Aspire teams are mostly the second team of GA clubs).
 
