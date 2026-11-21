@@ -207,6 +207,9 @@ def rate_table(games, p, force_national=False, ref=None, league=None):
                 region[t] = team_conf[t].split(" District")[0] if team_conf[t] else None
             else:
                 region[t] = conf_map.get(team_conf[t]) or (ev[t].most_common(1)[0][0] if ev[t] else None)
+            for o in reg.get("team_overrides", []):   # e.g. EA Texas: Dallas/DFW and El Paso play West
+                if team_conf[t] == o["conference"] and re.search(o["pattern"], t):
+                    region[t] = o["region"]
     tb = {t: ((s["gf"] - s["ga"]) / s["gp"], s["gf"] / s["gp"], s["ga"] / s["gp"], s["gp"]) for t, s in st.items() if s["gp"]}
     band = p.get("tie_band", 0.0)
     in_list = (lambda t: True) if (bridged or not national) else (lambda t: comp_of[t] == 0)

@@ -1,5 +1,5 @@
 {
-  "version": "1.4",
+  "version": "1.4.2",
   "margin_cap": 6,
   "ridge_lambda": 1.0,
   "event_weight": 1.0,
@@ -83,7 +83,15 @@
       "events": {
         "EA event 97": "West",
         "EA event 101": "East"
-      }
+      },
+      "team_overrides": [
+        {
+          "conference": "Texas",
+          "pattern": "(?i)\\b(dallas|dfw|el paso|steel united tx)\\b",
+          "region": "West",
+          "note": "Creed 2026-11-20: Texas splits; Dallas/DFW metro and El Paso play West, the rest of Texas (Houston, Austin, San Antonio, South Texas) East."
+        }
+      ]
     },
     "GA": {
       "conferences": {
