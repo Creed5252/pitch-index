@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.1 — 2026-11-20
+- GA Aspire added as a league: always ranked as one national list, with GA as the club-link reference (GA Aspire teams are mostly the second team of GA clubs).
+
 ## 1.4 — 2026-11-20
 - Margin cap 4 → 6; stability runs at cap 5 and 8 (decision 0010).
 - Methodology: MLS NEXT and NAL "not included yet" rows, N1L limits note, worked example updated.
