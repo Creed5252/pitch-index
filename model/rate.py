@@ -128,7 +128,7 @@ def rank_order(ratings, eligible, comp_of, national, tb=None, band=0.0):
 def club_key(team):
     """Club identity across age groups: the team name before the league tag (e.g. 'Solar SC
     ECNL B2010/11' -> 'solarsc'). Used only to bridge disconnected parts of a national table."""
-    base = re.split(r"\s+(?:ECNL|RL|EA2?|GA|DPLO?|N1)\b|\s+[BG](?:20)?\d\d|\s+[BG]?U\d\d[BG]?\b|\s+\d\d[BGU]\b|\s+\d\d/\d\d",
+    base = re.split(r"\s+(?:ECNL|RL|EA2?|GA|Aspire|DPLO?|N1)\b|\s+[BG](?:20)?\d\d|\s+[BG]?U\d\d[BG]?\b|\s+\d\d[BGU]\b|\s+\d\d/\d\d",
                     team or "", maxsplit=1, flags=re.I)[0]
     base = re.sub(r"\s*\(?\d\)?\s*$", "", base)   # second teams: 'AC Brea (2)', 'Rangers FC 2'
     return name_key(base)

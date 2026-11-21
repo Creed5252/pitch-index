@@ -87,3 +87,6 @@ def test_region_team_override_splits_a_conference():
                                 "team_overrides": [{"conference": "Texas", "pattern": "(?i)\\b(dallas|dfw|el paso)\\b", "region": "West"}]}})
     out = rate.rate_table(games, p, league="EA")
     assert {r["team"]: r.get("region") for r in out["table"]} == {"Atletico Dallas": "West", "CF10 Houston FC": "East"}
+
+def test_club_key_strips_aspire_tag():
+    assert rate.club_key("Wake FC Aspire 12/13") == rate.club_key("Wake FC GA 12/13") == "wakefc"
