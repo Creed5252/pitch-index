@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.3 — 2026-11-20
+- club_key strips "Aspire", so GA Aspire teams bridge to their GA club (linked share of each GA Aspire table rose from about 30% to 70–81%, in line with GA).
+- GA Aspire West/East regions, matching GA's split.
+
 ## 1.4.2 — 2026-11-20
 - EA regions: Texas splits. Dallas/DFW-metro clubs and El Paso are labeled West, the rest of Texas East (team_overrides in params; Creed's call from qualifier attendance).
 

@@ -1,5 +1,5 @@
 {
-  "version": "1.4.2",
+  "version": "1.4.3",
   "margin_cap": 6,
   "ridge_lambda": 1.0,
   "event_weight": 1.0,
@@ -140,6 +140,30 @@
     },
     "N1L": {
       "conference_prefix": true
+    },
+    "GA Aspire": {
+      "conferences": {
+        "West": [
+          "Colorado",
+          "Frontier",
+          "Mountain West",
+          "NorCal",
+          "Pacific Northwest",
+          "Southwest"
+        ],
+        "East": [
+          "Florida",
+          "Great Lakes",
+          "Mid-America",
+          "Mid-Atlantic North",
+          "Mid-Atlantic South",
+          "Midwest",
+          "New England",
+          "Northeast",
+          "Southeast"
+        ]
+      },
+      "events": {}
     }
   }
 }
