@@ -51,6 +51,10 @@
       "N1L",
       "ECNL RL",
       "ECNL"
+    ],
+    "GA Aspire": [
+      "GA Aspire",
+      "GA"
     ]
   },
   "bridge_min_links": 3,
