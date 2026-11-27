@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0 — 2026-11-26
+- MLS NEXT Homegrown Division added, from the public schedule JSON behind mlssoccer.com's viewers (1,792 league games, U13 to U19). MLS NEXT last refreshed that file on 2026-10-29, so its results run through 2026-10-25; the league shows its own results-through date. The Academy Division publishes no results yet.
+- MLS NEXT is ranked within each conference, not nationally: its conferences have not played each other in the public results, and bridging through club strength in other leagues linked almost no teams. It moves to national once cross-conference results appear.
+- tables.json carries each table's last_game date.
+
 ## 1.4.3 — 2026-11-20
 - club_key strips "Aspire", so GA Aspire teams bridge to their GA club (linked share of each GA Aspire table rose from about 30% to 70–81%, in line with GA).
 - GA Aspire West/East regions, matching GA's split.

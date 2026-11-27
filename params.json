@@ -1,5 +1,5 @@
 {
-  "version": "1.4.3",
+  "version": "1.5.0",
   "margin_cap": 6,
   "ridge_lambda": 1.0,
   "event_weight": 1.0,

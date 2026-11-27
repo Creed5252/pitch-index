@@ -249,7 +249,7 @@ def rate_table(games, p, force_national=False, ref=None, league=None):
     used = sorted({r["group"] for r in rows})
     out = dict(national=national, main_share=round(share, 3), groups=len(comps),
                group_labels={str(i): labels[i] for i in used},
-               home_edge=round(hfa, 3), games=len(games), table=rows)
+               home_edge=round(hfa, 3), games=len(games), last_game=max(g["date"] for g in games), table=rows)
     if reg:
         if reg.get("conference_prefix"):
             cnt = collections.Counter(x.get("region") for x in rows if x.get("region"))
